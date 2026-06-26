@@ -1,5 +1,6 @@
 import { useEffect } from 'react';
 import { useSettingsStore } from '@/store/settingsStore';
+import { buildAccentRamp } from '@/utils/color/accentRamp';
 
 function resolveTheme(theme: 'dark' | 'light' | 'system'): 'dark' | 'light' {
   if (theme !== 'system') return theme;
@@ -12,6 +13,15 @@ export function useThemeEffect() {
   const reducedMotion = useSettingsStore((s) => s.reducedMotion);
   const highContrast = useSettingsStore((s) => s.highContrast);
   const largeText = useSettingsStore((s) => s.largeText);
+  const accentColor = useSettingsStore((s) => s.accentColor);
+
+  useEffect(() => {
+    const ramp = buildAccentRamp(accentColor);
+    const root = document.documentElement;
+    for (const [step, hex] of Object.entries(ramp)) {
+      root.style.setProperty(`--color-primary-${step}`, hex);
+    }
+  }, [accentColor]);
 
   useEffect(() => {
     const root = document.documentElement;
