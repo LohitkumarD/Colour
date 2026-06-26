@@ -6,6 +6,7 @@ import { TopBar } from './TopBar';
 import { BottomNav } from './BottomNav';
 import { Fab } from './Fab';
 import { CommandPalette } from './CommandPalette';
+import { OnboardingModal } from './OnboardingModal';
 import { ToastContainer } from '@/components/ui/ToastContainer';
 import { useThemeEffect } from '@/hooks/useThemeEffect';
 import { usePaletteStore } from '@/store/paletteStore';
@@ -49,6 +50,7 @@ export function AppShell() {
       <BottomNav />
       <Fab />
       <CommandPalette />
+      <OnboardingModal />
       <ToastContainer />
     </div>
   );

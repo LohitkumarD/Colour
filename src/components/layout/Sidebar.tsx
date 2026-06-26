@@ -64,6 +64,20 @@ export function Sidebar() {
         ))}
       </nav>
 
+      {!collapsed && (
+        <div className="mx-2.5 mb-1 flex flex-wrap gap-x-3 gap-y-1 px-3 text-xs text-[var(--text-tertiary)]">
+          <NavLink to="/about" className="hover:text-[var(--text-primary)]">
+            About
+          </NavLink>
+          <NavLink to="/privacy" className="hover:text-[var(--text-primary)]">
+            Privacy
+          </NavLink>
+          <NavLink to="/terms" className="hover:text-[var(--text-primary)]">
+            Terms
+          </NavLink>
+        </div>
+      )}
+
       <button
         type="button"
         onClick={toggleSidebar}
