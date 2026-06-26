@@ -7,6 +7,7 @@ import { BottomNav } from './BottomNav';
 import { Fab } from './Fab';
 import { CommandPalette } from './CommandPalette';
 import { OnboardingModal } from './OnboardingModal';
+import { PwaManager } from './PwaManager';
 import { ToastContainer } from '@/components/ui/ToastContainer';
 import { useThemeEffect } from '@/hooks/useThemeEffect';
 import { usePaletteStore } from '@/store/paletteStore';
@@ -81,6 +82,7 @@ export function AppShell() {
       <Fab />
       <CommandPalette />
       <OnboardingModal />
+      <PwaManager />
       <ToastContainer />
     </div>
   );

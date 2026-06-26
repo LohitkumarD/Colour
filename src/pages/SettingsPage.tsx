@@ -8,6 +8,7 @@ import {
   Monitor,
   Moon,
   RotateCcw,
+  Smartphone,
   Sun,
   Upload,
 } from 'lucide-react';
@@ -56,6 +57,11 @@ const EXPORT_FORMAT_OPTIONS: { value: ExportFormat; label: string }[] = [
   { value: 'png', label: 'PNG' },
   { value: 'figma', label: 'Figma' },
 ];
+
+interface BeforeInstallPromptEvent extends Event {
+  prompt: () => Promise<void>;
+  userChoice: Promise<{ outcome: 'accepted' | 'dismissed' }>;
+}
 
 interface ToggleRowProps {
   label: string;
@@ -116,12 +122,35 @@ export default function SettingsPage() {
   const history = usePaletteStore((s) => s.history);
   const clearHistory = usePaletteStore((s) => s.clearHistory);
   const addToast = useUiStore((s) => s.addToast);
+  const installPromptEvent = useUiStore((s) => s.installPromptEvent);
+  const setInstallPrompt = useUiStore((s) => s.setInstallPrompt);
 
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [exporting, setExporting] = useState(false);
   const [importing, setImporting] = useState(false);
   const [resetting, setResetting] = useState(false);
   const [resetModalOpen, setResetModalOpen] = useState(false);
+  const [installing, setInstalling] = useState(false);
+
+  const isStandalone =
+    typeof window !== 'undefined' && window.matchMedia('(display-mode: standalone)').matches;
+
+  const handleInstall = async () => {
+    const promptEvent = installPromptEvent as BeforeInstallPromptEvent | null;
+    if (!promptEvent) return;
+    setInstalling(true);
+    try {
+      await promptEvent.prompt();
+      const { outcome } = await promptEvent.userChoice;
+      setInstallPrompt(null);
+      addToast({
+        message: outcome === 'accepted' ? 'App installed' : 'Install dismissed',
+        variant: outcome === 'accepted' ? 'success' : 'info',
+      });
+    } finally {
+      setInstalling(false);
+    }
+  };
 
   const handleExport = async () => {
     setExporting(true);
@@ -305,6 +334,40 @@ export default function SettingsPage() {
               </option>
             ))}
           </Select>
+        </CardContent>
+      </Card>
+
+      <Card strong>
+        <CardHeader>
+          <CardTitle>App</CardTitle>
+        </CardHeader>
+        <CardContent>
+          {isStandalone ? (
+            <p className="text-sm text-[var(--text-tertiary)]">
+              Running as an installed app — most tools work fully offline.
+            </p>
+          ) : installPromptEvent ? (
+            <div className="flex items-center justify-between gap-4">
+              <div>
+                <p className="text-sm font-medium text-[var(--text-primary)]">Install Color Theory Studio</p>
+                <p className="text-xs text-[var(--text-tertiary)]">
+                  Add it to your home screen or desktop for quick, offline access.
+                </p>
+              </div>
+              <Button
+                leftIcon={<Smartphone className="size-4" />}
+                loading={installing}
+                onClick={handleInstall}
+                className="shrink-0"
+              >
+                Install
+              </Button>
+            </div>
+          ) : (
+            <p className="text-sm text-[var(--text-tertiary)]">
+              Use your browser's menu and choose "Install app" or "Add to Home Screen" to install.
+            </p>
+          )}
         </CardContent>
       </Card>
 
