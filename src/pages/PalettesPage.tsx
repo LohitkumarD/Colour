@@ -1,4 +1,5 @@
 import { useMemo, useState } from 'react';
+import { useSearchParams } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { Copy, Download, FolderPlus, Heart, Library, Search, Trash2, X } from 'lucide-react';
 import { Button } from '@/components/ui/Button';
@@ -334,8 +335,9 @@ export default function PalettesPage() {
   const deleteFolder = usePaletteStore((s) => s.deleteFolder);
   const addToast = useUiStore((s) => s.addToast);
 
+  const [searchParams] = useSearchParams();
   const [filter, setFilter] = useState<FilterValue>('all');
-  const [search, setSearch] = useState('');
+  const [search, setSearch] = useState(() => searchParams.get('q') ?? '');
   const [exportTarget, setExportTarget] = useState<Palette | null>(null);
 
   const counts = useMemo(() => {

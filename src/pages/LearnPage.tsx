@@ -1,4 +1,5 @@
 import { useMemo, useState } from 'react';
+import { useSearchParams } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import {
   Blend,
@@ -157,8 +158,12 @@ export default function LearnPage() {
   const getProgress = useLearningStore((s) => s.getProgress);
   const toggleBookmark = useLearningStore((s) => s.toggleBookmark);
 
+  const [searchParams] = useSearchParams();
   const [levelFilter, setLevelFilter] = useState<'all' | LessonLevel>('all');
-  const [selectedId, setSelectedId] = useState(LESSONS[0].id);
+  const [selectedId, setSelectedId] = useState(() => {
+    const requested = searchParams.get('lesson');
+    return requested && LESSONS.some((l) => l.id === requested) ? requested : LESSONS[0].id;
+  });
 
   const filtered = useMemo(
     () => (levelFilter === 'all' ? LESSONS : LESSONS.filter((l) => l.level === levelFilter)),
