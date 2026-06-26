@@ -1,4 +1,4 @@
-import { Suspense } from 'react';
+import { Suspense, useEffect } from 'react';
 import { Outlet } from 'react-router-dom';
 import { Loader2 } from 'lucide-react';
 import { Sidebar } from './Sidebar';
@@ -8,6 +8,8 @@ import { Fab } from './Fab';
 import { CommandPalette } from './CommandPalette';
 import { ToastContainer } from '@/components/ui/ToastContainer';
 import { useThemeEffect } from '@/hooks/useThemeEffect';
+import { usePaletteStore } from '@/store/paletteStore';
+import { useLearningStore } from '@/store/learningStore';
 
 function RouteFallback() {
   return (
@@ -19,6 +21,16 @@ function RouteFallback() {
 
 export function AppShell() {
   useThemeEffect();
+
+  const paletteHydrated = usePaletteStore((s) => s.hydrated);
+  const hydratePalettes = usePaletteStore((s) => s.hydrate);
+  const learningHydrated = useLearningStore((s) => s.hydrated);
+  const hydrateLearning = useLearningStore((s) => s.hydrate);
+
+  useEffect(() => {
+    if (!paletteHydrated) hydratePalettes();
+    if (!learningHydrated) hydrateLearning();
+  }, [paletteHydrated, hydratePalettes, learningHydrated, hydrateLearning]);
 
   return (
     <div className="flex min-h-dvh bg-[var(--bg-base)]">
