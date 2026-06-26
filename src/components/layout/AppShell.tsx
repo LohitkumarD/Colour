@@ -1,5 +1,5 @@
 import { Suspense, useEffect } from 'react';
-import { Outlet } from 'react-router-dom';
+import { Outlet, useLocation } from 'react-router-dom';
 import { Loader2 } from 'lucide-react';
 import { Sidebar } from './Sidebar';
 import { TopBar } from './TopBar';
@@ -20,8 +20,38 @@ function RouteFallback() {
   );
 }
 
+const ROUTE_TITLES: Record<string, string> = {
+  '/': 'Dashboard',
+  '/wheel': 'Color Wheel',
+  '/converter': 'Converter',
+  '/harmony': 'Harmony',
+  '/tones': 'Tints & Shades',
+  '/gradients': 'Gradients',
+  '/mixer': 'Mixer',
+  '/pigment-wheel': 'Pigment Wheel',
+  '/extract': 'Image Extractor',
+  '/contrast': 'Contrast Checker',
+  '/blindness': 'Color Blindness',
+  '/palettes': 'Palettes',
+  '/assistant': 'AI Assistant',
+  '/learn': 'Learning Hub',
+  '/settings': 'Settings',
+  '/about': 'About',
+  '/privacy': 'Privacy',
+  '/terms': 'Terms',
+};
+
+function useRouteTitle() {
+  const location = useLocation();
+  useEffect(() => {
+    const name = ROUTE_TITLES[location.pathname];
+    document.title = name ? `${name} · Color Theory Studio` : 'Color Theory Studio';
+  }, [location.pathname]);
+}
+
 export function AppShell() {
   useThemeEffect();
+  useRouteTitle();
 
   const paletteHydrated = usePaletteStore((s) => s.hydrated);
   const hydratePalettes = usePaletteStore((s) => s.hydrate);

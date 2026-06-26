@@ -1,5 +1,5 @@
 import { useCallback, useMemo, useRef, useState } from 'react';
-import type { PointerEvent as ReactPointerEvent } from 'react';
+import type { KeyboardEvent as ReactKeyboardEvent, PointerEvent as ReactPointerEvent } from 'react';
 import { motion } from 'framer-motion';
 import { RotateCcw, Sparkles } from 'lucide-react';
 import { Button } from '@/components/ui/Button';
@@ -80,6 +80,29 @@ export default function ColorWheelPage() {
     void addHistory('color', hex, hex);
   };
 
+  const handleWheelKeyDown = (e: ReactKeyboardEvent<HTMLDivElement>) => {
+    const step = e.shiftKey ? 10 : 2;
+    let { h, s } = hsv;
+    switch (e.key) {
+      case 'ArrowLeft':
+        h = (h - step + 360) % 360;
+        break;
+      case 'ArrowRight':
+        h = (h + step) % 360;
+        break;
+      case 'ArrowUp':
+        s = Math.min(100, s + step);
+        break;
+      case 'ArrowDown':
+        s = Math.max(0, s - step);
+        break;
+      default:
+        return;
+    }
+    e.preventDefault();
+    setHsv((prev) => ({ ...prev, h, s }));
+  };
+
   const handleRandomize = () => {
     setHsv({ h: Math.random() * 360, s: 40 + Math.random() * 60, v: 55 + Math.random() * 45 });
   };
@@ -126,8 +149,10 @@ export default function ColorWheelPage() {
             onPointerMove={handlePointerMove}
             onPointerUp={handlePointerUp}
             onPointerCancel={handlePointerUp}
+            onKeyDown={handleWheelKeyDown}
             role="slider"
-            aria-label="Hue and saturation"
+            tabIndex={0}
+            aria-label="Hue and saturation. Use arrow keys to adjust, hold Shift for larger steps."
             aria-valuetext={`Hue ${Math.round(hsv.h)}, saturation ${Math.round(hsv.s)}%`}
             className="relative shrink-0 touch-none select-none rounded-full shadow-[var(--shadow-card)]"
             style={{
