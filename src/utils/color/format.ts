@@ -1,4 +1,4 @@
-import type { CMYK, HSL, HSV, LAB, LCH, OKLCH, OKLab, RGB, RGBA } from '@/types/color';
+import type { CMYK, HSL, HSV, LAB, LCH, OKLCH, OKLab, RGB, RGBA, XYZ } from '@/types/color';
 import { hexToRgb, hslToRgb, hsvToRgb, isValidHex, rgbToHex } from './conversions';
 
 export function formatRgb(rgb: RGB): string {
@@ -23,6 +23,10 @@ export function formatCmyk(cmyk: CMYK): string {
 
 export function formatLab(lab: LAB): string {
   return `lab(${lab.l}% ${lab.a} ${lab.b})`;
+}
+
+export function formatXyz(xyz: XYZ): string {
+  return `xyz(${xyz.x}, ${xyz.y}, ${xyz.z})`;
 }
 
 export function formatLch(lch: LCH): string {
