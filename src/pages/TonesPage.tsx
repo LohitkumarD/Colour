@@ -1,14 +1,12 @@
 import { useMemo, useState } from 'react';
 import { motion } from 'framer-motion';
-import { Pipette, RotateCcw, Shuffle, Sparkles } from 'lucide-react';
+import { RotateCcw, Shuffle, Sparkles } from 'lucide-react';
 import { Button } from '@/components/ui/Button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/Card';
-import { Input } from '@/components/ui/Input';
+import { ColorPickerField } from '@/components/ui/ColorPickerField';
 import { Slider } from '@/components/ui/Slider';
-import { ColorSwatch } from '@/components/ui/ColorSwatch';
 import { usePaletteStore } from '@/store/paletteStore';
 import { useUiStore } from '@/store/uiStore';
-import { normalizeHex } from '@/utils/color/format';
 import { randomHex } from '@/utils/color/random';
 import { generateShades, generateTints, generateTones } from '@/utils/color/tones';
 import type { PaletteSource } from '@/types/palette';
@@ -78,23 +76,13 @@ function RampRow({ title, description, colors, baseHex, source }: RampRowProps) 
 
 export default function TonesPage() {
   const [baseHex, setBaseHex] = useState(DEFAULT_BASE);
-  const [hexInput, setHexInput] = useState(DEFAULT_BASE);
   const [steps, setSteps] = useState(8);
 
   const tints = useMemo(() => generateTints(baseHex, steps), [baseHex, steps]);
   const shades = useMemo(() => generateShades(baseHex, steps), [baseHex, steps]);
   const tones = useMemo(() => generateTones(baseHex, steps), [baseHex, steps]);
 
-  const applyBase = (hex: string) => {
-    setBaseHex(hex);
-    setHexInput(hex);
-  };
-
-  const handleHexInputChange = (value: string) => {
-    setHexInput(value);
-    const normalized = normalizeHex(value);
-    if (normalized) setBaseHex(normalized);
-  };
+  const applyBase = (hex: string) => setBaseHex(hex);
 
   return (
     <motion.div
@@ -113,17 +101,13 @@ export default function TonesPage() {
       <Card strong>
         <CardContent className="flex flex-col gap-4 p-5">
           <div className="flex flex-col gap-3.5 sm:flex-row sm:items-center">
-            <ColorSwatch hex={baseHex} size="xl" copyOnClick />
-            <div className="flex-1">
-              <Input
-                value={hexInput}
-                onChange={(e) => handleHexInputChange(e.target.value)}
-                onBlur={() => setHexInput(baseHex)}
-                prefix={<Pipette className="size-4 text-[var(--text-tertiary)]" />}
-                className="font-mono uppercase"
-                aria-label="Base color hex value"
-              />
-            </div>
+            <ColorPickerField
+              value={baseHex}
+              onChange={applyBase}
+              ariaLabel="Base color hex value"
+              swatchSize="xl"
+              className="flex-1"
+            />
             <div className="flex gap-2.5">
               <Button variant="secondary" size="sm" leftIcon={<Shuffle className="size-4" />} onClick={() => applyBase(randomHex())}>
                 Randomize

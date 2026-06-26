@@ -1,16 +1,15 @@
 import { useMemo, useState } from 'react';
 import { motion } from 'framer-motion';
-import { Pipette, Shuffle, Sparkles } from 'lucide-react';
+import { Shuffle, Sparkles } from 'lucide-react';
 import { Button } from '@/components/ui/Button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/Card';
-import { Input } from '@/components/ui/Input';
+import { ColorPickerField } from '@/components/ui/ColorPickerField';
 import { Slider } from '@/components/ui/Slider';
 import { SegmentedControl } from '@/components/ui/SegmentedControl';
 import { ColorSwatch } from '@/components/ui/ColorSwatch';
 import { CopyField } from '@/components/ui/CopyField';
 import { usePaletteStore } from '@/store/paletteStore';
 import { useUiStore } from '@/store/uiStore';
-import { normalizeHex } from '@/utils/color/format';
 import { randomHex } from '@/utils/color/random';
 import { applyOpacityOverWhite, mixColors, PAINT_TYPE_LABELS } from '@/utils/color/mixing';
 import type { PaintType } from '@/types/color';
@@ -21,41 +20,6 @@ const PAINT_OPTIONS = (Object.keys(PAINT_TYPE_LABELS) as PaintType[]).map((value
 }));
 
 const STEP_COUNT = 7;
-
-interface ColorPickerFieldProps {
-  label: string;
-  hex: string;
-  onChange: (hex: string) => void;
-}
-
-function ColorPickerField({ label, hex, onChange }: ColorPickerFieldProps) {
-  const [input, setInput] = useState(hex);
-
-  const handleChange = (value: string) => {
-    setInput(value);
-    const normalized = normalizeHex(value);
-    if (normalized) onChange(normalized);
-  };
-
-  return (
-    <div className="flex flex-1 items-center gap-3">
-      <ColorSwatch hex={hex} size="lg" copyOnClick />
-      <div className="flex-1">
-        <Input
-          label={label}
-          value={input}
-          onChange={(e) => handleChange(e.target.value)}
-          onBlur={() => setInput(hex)}
-          prefix={<Pipette className="size-4 text-[var(--text-tertiary)]" />}
-          className="font-mono uppercase"
-        />
-      </div>
-      <Button variant="ghost" size="icon" aria-label={`Randomize ${label}`} onClick={() => onChange(randomHex())}>
-        <Shuffle className="size-4" />
-      </Button>
-    </div>
-  );
-}
 
 export default function MixerPage() {
   const addHistory = usePaletteStore((s) => s.addHistory);
@@ -122,8 +86,18 @@ export default function MixerPage() {
       <Card strong>
         <CardContent className="flex flex-col gap-4 p-5">
           <div className="flex flex-col gap-4 sm:flex-row">
-            <ColorPickerField label="Color A" hex={hexA} onChange={setHexA} />
-            <ColorPickerField label="Color B" hex={hexB} onChange={setHexB} />
+            <div className="flex flex-1 items-center gap-2">
+              <ColorPickerField label="Color A" value={hexA} onChange={setHexA} className="flex-1" />
+              <Button variant="ghost" size="icon" aria-label="Randomize Color A" onClick={() => setHexA(randomHex())}>
+                <Shuffle className="size-4" />
+              </Button>
+            </div>
+            <div className="flex flex-1 items-center gap-2">
+              <ColorPickerField label="Color B" value={hexB} onChange={setHexB} className="flex-1" />
+              <Button variant="ghost" size="icon" aria-label="Randomize Color B" onClick={() => setHexB(randomHex())}>
+                <Shuffle className="size-4" />
+              </Button>
+            </div>
           </div>
           <SegmentedControl options={PAINT_OPTIONS} value={paintType} onChange={setPaintType} aria-label="Paint profile" />
         </CardContent>

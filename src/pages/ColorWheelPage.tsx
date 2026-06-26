@@ -1,18 +1,17 @@
-import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { useCallback, useMemo, useRef, useState } from 'react';
 import type { PointerEvent as ReactPointerEvent } from 'react';
 import { motion } from 'framer-motion';
-import { Pipette, RotateCcw, Sparkles } from 'lucide-react';
+import { RotateCcw, Sparkles } from 'lucide-react';
 import { Button } from '@/components/ui/Button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/Card';
-import { Input } from '@/components/ui/Input';
+import { ColorPickerField } from '@/components/ui/ColorPickerField';
 import { Select } from '@/components/ui/Select';
 import { Slider } from '@/components/ui/Slider';
-import { ColorSwatch } from '@/components/ui/ColorSwatch';
 import { CopyField } from '@/components/ui/CopyField';
 import { usePaletteStore } from '@/store/paletteStore';
 import { useUiStore } from '@/store/uiStore';
 import { hexToRgb, hsvToRgb, rgbToHex, rgbToHsv } from '@/utils/color/conversions';
-import { formatCmyk, formatHsl, formatHsv, formatRgb, normalizeHex } from '@/utils/color/format';
+import { formatCmyk, formatHsl, formatHsv, formatRgb } from '@/utils/color/format';
 import { getAllFormats } from '@/utils/color/allFormats';
 import { generateHarmonyPalette, HARMONY_LABELS, HARMONY_RULES } from '@/utils/color/harmony';
 import type { HarmonyRule, HSV } from '@/types/color';
@@ -46,7 +45,6 @@ export default function ColorWheelPage() {
   const addToast = useUiStore((s) => s.addToast);
 
   const [hsv, setHsv] = useState<HSV>(DEFAULT_HSV);
-  const [hexInput, setHexInput] = useState('');
   const [harmonyRule, setHarmonyRule] = useState<HarmonyRule>('complementary');
   const [saving, setSaving] = useState(false);
 
@@ -56,10 +54,6 @@ export default function ColorWheelPage() {
   const hex = useMemo(() => rgbToHex(hsvToRgb(hsv)), [hsv]);
   const formats = useMemo(() => getAllFormats(hex), [hex]);
   const harmonyColors = useMemo(() => generateHarmonyPalette(hex, harmonyRule, 5), [hex, harmonyRule]);
-
-  useEffect(() => {
-    setHexInput(hex);
-  }, [hex]);
 
   const updateFromPoint = useCallback((clientX: number, clientY: number) => {
     const el = wheelRef.current;
@@ -84,12 +78,6 @@ export default function ColorWheelPage() {
     draggingRef.current = false;
     e.currentTarget.releasePointerCapture(e.pointerId);
     void addHistory('color', hex, hex);
-  };
-
-  const handleHexInputChange = (value: string) => {
-    setHexInput(value);
-    const normalized = normalizeHex(value);
-    if (normalized) setHsv(rgbToHsv(hexToRgb(normalized)));
   };
 
   const handleRandomize = () => {
@@ -164,17 +152,13 @@ export default function ColorWheelPage() {
             trackGradient={`linear-gradient(90deg, black, hsl(${hsv.h} ${hsv.s}% 50%))`}
           />
 
-          <div className="flex w-full items-center gap-2.5">
-            <ColorSwatch hex={hex} size="lg" copyOnClick />
-            <Input
-              value={hexInput}
-              onChange={(e) => handleHexInputChange(e.target.value)}
-              onBlur={() => setHexInput(hex)}
-              prefix={<Pipette className="size-4 text-[var(--text-tertiary)]" />}
-              className="font-mono uppercase"
-              aria-label="Hex color value"
-            />
-          </div>
+          <ColorPickerField
+            value={hex}
+            onChange={(newHex) => setHsv(rgbToHsv(hexToRgb(newHex)))}
+            ariaLabel="Hex color value"
+            swatchSize="lg"
+            className="w-full"
+          />
 
           <div className="flex w-full flex-wrap gap-2.5">
             <Button variant="secondary" size="sm" leftIcon={<Sparkles className="size-4" />} onClick={handleRandomize}>

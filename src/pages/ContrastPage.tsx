@@ -1,14 +1,13 @@
 import { useMemo, useState } from 'react';
 import { motion } from 'framer-motion';
-import { ArrowLeftRight, Pipette, Sparkles, Wand2 } from 'lucide-react';
+import { ArrowLeftRight, Sparkles, Wand2 } from 'lucide-react';
 import { Button } from '@/components/ui/Button';
 import { Badge } from '@/components/ui/Badge';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/Card';
-import { Input } from '@/components/ui/Input';
+import { ColorPickerField } from '@/components/ui/ColorPickerField';
 import { ColorSwatch } from '@/components/ui/ColorSwatch';
 import { usePaletteStore } from '@/store/paletteStore';
 import { useUiStore } from '@/store/uiStore';
-import { normalizeHex } from '@/utils/color/format';
 import { getWcagResult, suggestAccessibleColor } from '@/utils/color/contrast';
 
 const DEFAULT_FG = '#0F1115';
@@ -39,8 +38,6 @@ export default function ContrastPage() {
 
   const [fg, setFg] = useState(DEFAULT_FG);
   const [bg, setBg] = useState(DEFAULT_BG);
-  const [fgInput, setFgInput] = useState(DEFAULT_FG);
-  const [bgInput, setBgInput] = useState(DEFAULT_BG);
   const [saving, setSaving] = useState(false);
 
   const result = useMemo(() => getWcagResult(fg, bg), [fg, bg]);
@@ -49,29 +46,14 @@ export default function ContrastPage() {
     [fg, bg, result.aaNormal],
   );
 
-  const handleFgChange = (value: string) => {
-    setFgInput(value);
-    const normalized = normalizeHex(value);
-    if (normalized) setFg(normalized);
-  };
-
-  const handleBgChange = (value: string) => {
-    setBgInput(value);
-    const normalized = normalizeHex(value);
-    if (normalized) setBg(normalized);
-  };
-
   const swapColors = () => {
     setFg(bg);
     setBg(fg);
-    setFgInput(bg);
-    setBgInput(fg);
   };
 
   const applySuggestion = () => {
     if (!suggestion) return;
     setFg(suggestion);
-    setFgInput(suggestion);
   };
 
   const saveAsPalette = async () => {
@@ -102,35 +84,11 @@ export default function ContrastPage() {
       <Card strong>
         <CardContent className="flex flex-col gap-4 p-5">
           <div className="flex flex-col gap-4 sm:flex-row sm:items-center">
-            <div className="flex flex-1 items-center gap-3">
-              <ColorSwatch hex={fg} size="lg" copyOnClick />
-              <div className="flex-1">
-                <Input
-                  label="Foreground (text)"
-                  value={fgInput}
-                  onChange={(e) => handleFgChange(e.target.value)}
-                  onBlur={() => setFgInput(fg)}
-                  prefix={<Pipette className="size-4 text-[var(--text-tertiary)]" />}
-                  className="font-mono uppercase"
-                />
-              </div>
-            </div>
+            <ColorPickerField label="Foreground (text)" value={fg} onChange={setFg} swatchSize="lg" className="flex-1" />
             <Button variant="ghost" size="icon" aria-label="Swap colors" onClick={swapColors} className="mt-5 self-center sm:mt-0">
               <ArrowLeftRight className="size-4" />
             </Button>
-            <div className="flex flex-1 items-center gap-3">
-              <ColorSwatch hex={bg} size="lg" copyOnClick />
-              <div className="flex-1">
-                <Input
-                  label="Background"
-                  value={bgInput}
-                  onChange={(e) => handleBgChange(e.target.value)}
-                  onBlur={() => setBgInput(bg)}
-                  prefix={<Pipette className="size-4 text-[var(--text-tertiary)]" />}
-                  className="font-mono uppercase"
-                />
-              </div>
-            </div>
+            <ColorPickerField label="Background" value={bg} onChange={setBg} swatchSize="lg" className="flex-1" />
           </div>
         </CardContent>
       </Card>
