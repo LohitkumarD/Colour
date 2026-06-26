@@ -9,6 +9,7 @@ const HarmonyPage = lazy(() => import('@/pages/HarmonyPage'));
 const TonesPage = lazy(() => import('@/pages/TonesPage'));
 const GradientsPage = lazy(() => import('@/pages/GradientsPage'));
 const MixerPage = lazy(() => import('@/pages/MixerPage'));
+const PigmentWheelPage = lazy(() => import('@/pages/PigmentWheelPage'));
 const ExtractPage = lazy(() => import('@/pages/ExtractPage'));
 const ContrastPage = lazy(() => import('@/pages/ContrastPage'));
 const BlindnessPage = lazy(() => import('@/pages/BlindnessPage'));
@@ -33,6 +34,7 @@ export const router = createBrowserRouter([
       { path: 'tones', element: <TonesPage /> },
       { path: 'gradients', element: <GradientsPage /> },
       { path: 'mixer', element: <MixerPage /> },
+      { path: 'pigment-wheel', element: <PigmentWheelPage /> },
       { path: 'extract', element: <ExtractPage /> },
       { path: 'contrast', element: <ContrastPage /> },
       { path: 'blindness', element: <BlindnessPage /> },

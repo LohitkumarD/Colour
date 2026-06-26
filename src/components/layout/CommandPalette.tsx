@@ -2,26 +2,74 @@ import { useEffect, useMemo, useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
 import { useNavigate } from 'react-router-dom';
 import { AnimatePresence, motion } from 'framer-motion';
-import { CornerDownLeft, Search } from 'lucide-react';
+import { CornerDownLeft, GraduationCap, Library, Search } from 'lucide-react';
+import type { LucideIcon } from 'lucide-react';
 import { NAV_ITEMS } from '@/config/navigation';
 import { useUiStore } from '@/store/uiStore';
+import { usePaletteStore } from '@/store/paletteStore';
 import { useFocusTrap } from '@/hooks/useFocusTrap';
+import { LESSONS } from '@/data/lessons';
 import { cn } from '@/utils/cn';
+
+type ResultGroup = 'Pages' | 'Palettes' | 'Lessons';
+
+interface CommandResult {
+  key: string;
+  label: string;
+  sublabel?: string;
+  icon: LucideIcon;
+  group: ResultGroup;
+  path: string;
+}
+
+const MAX_CONTENT_RESULTS = 5;
 
 export function CommandPalette() {
   const open = useUiStore((s) => s.commandPaletteOpen);
   const setOpen = useUiStore((s) => s.setCommandPaletteOpen);
+  const palettes = usePaletteStore((s) => s.palettes);
   const navigate = useNavigate();
   const [query, setQuery] = useState('');
   const [activeIndex, setActiveIndex] = useState(0);
   const inputRef = useRef<HTMLInputElement>(null);
   const containerRef = useFocusTrap(open, () => setOpen(false));
 
-  const results = useMemo(() => {
+  const results = useMemo<CommandResult[]>(() => {
     const q = query.trim().toLowerCase();
-    if (!q) return NAV_ITEMS;
-    return NAV_ITEMS.filter((item) => item.label.toLowerCase().includes(q));
-  }, [query]);
+
+    const pageResults: CommandResult[] = NAV_ITEMS.filter((item) => !q || item.label.toLowerCase().includes(q)).map(
+      (item) => ({ key: `page-${item.path}`, label: item.label, icon: item.icon, group: 'Pages', path: item.path }),
+    );
+
+    if (!q) return pageResults;
+
+    const paletteResults: CommandResult[] = palettes
+      .filter((p) => p.name.toLowerCase().includes(q) || p.tags.some((t) => t.toLowerCase().includes(q)))
+      .slice(0, MAX_CONTENT_RESULTS)
+      .map((p) => ({
+        key: `palette-${p.id}`,
+        label: p.name,
+        sublabel: `${p.colors.length} colors`,
+        icon: Library,
+        group: 'Palettes',
+        path: `/palettes?q=${encodeURIComponent(p.name)}`,
+      }));
+
+    const lessonResults: CommandResult[] = LESSONS.filter(
+      (l) => l.title.toLowerCase().includes(q) || l.summary.toLowerCase().includes(q),
+    )
+      .slice(0, MAX_CONTENT_RESULTS)
+      .map((l) => ({
+        key: `lesson-${l.id}`,
+        label: l.title,
+        sublabel: l.summary,
+        icon: GraduationCap,
+        group: 'Lessons',
+        path: `/learn?lesson=${l.id}`,
+      }));
+
+    return [...pageResults, ...paletteResults, ...lessonResults];
+  }, [query, palettes]);
 
   useEffect(() => {
     if (open) {
@@ -94,8 +142,8 @@ export function CommandPalette() {
                 value={query}
                 onChange={(e) => setQuery(e.target.value)}
                 onKeyDown={handleKeyDown}
-                placeholder="Search modules…"
-                aria-label="Search modules"
+                placeholder="Search modules, palettes, lessons…"
+                aria-label="Search modules, palettes, lessons"
                 className="w-full bg-transparent text-sm text-[var(--text-primary)] outline-none placeholder:text-[var(--text-tertiary)]"
               />
               <kbd className="shrink-0 rounded-md border border-[var(--border-subtle)] px-1.5 py-0.5 text-[10px] font-semibold text-[var(--text-tertiary)]">
@@ -108,22 +156,33 @@ export function CommandPalette() {
                 <p className="px-3 py-6 text-center text-sm text-[var(--text-tertiary)]">No matches found.</p>
               )}
               {results.map((item, index) => (
-                <button
-                  key={item.path}
-                  type="button"
-                  onClick={() => select(item.path)}
-                  onMouseEnter={() => setActiveIndex(index)}
-                  className={cn(
-                    'flex w-full items-center gap-3 rounded-[var(--radius-control)] px-3 py-2.5 text-left text-sm font-medium transition-colors',
-                    index === activeIndex
-                      ? 'bg-[var(--glass-bg-strong)] text-[var(--text-primary)]'
-                      : 'text-[var(--text-secondary)]',
+                <div key={item.key}>
+                  {(index === 0 || results[index - 1].group !== item.group) && (
+                    <p className="px-3 pb-1 pt-2.5 text-[11px] font-semibold uppercase tracking-wide text-[var(--text-tertiary)]">
+                      {item.group}
+                    </p>
                   )}
-                >
-                  <item.icon className="size-4 shrink-0" />
-                  <span className="flex-1 truncate">{item.label}</span>
-                  {index === activeIndex && <CornerDownLeft className="size-3.5 shrink-0 text-[var(--text-tertiary)]" />}
-                </button>
+                  <button
+                    type="button"
+                    onClick={() => select(item.path)}
+                    onMouseEnter={() => setActiveIndex(index)}
+                    className={cn(
+                      'flex w-full items-center gap-3 rounded-[var(--radius-control)] px-3 py-2.5 text-left text-sm font-medium transition-colors',
+                      index === activeIndex
+                        ? 'bg-[var(--glass-bg-strong)] text-[var(--text-primary)]'
+                        : 'text-[var(--text-secondary)]',
+                    )}
+                  >
+                    <item.icon className="size-4 shrink-0" />
+                    <span className="min-w-0 flex-1">
+                      <span className="block truncate">{item.label}</span>
+                      {item.sublabel && (
+                        <span className="block truncate text-xs font-normal text-[var(--text-tertiary)]">{item.sublabel}</span>
+                      )}
+                    </span>
+                    {index === activeIndex && <CornerDownLeft className="size-3.5 shrink-0 text-[var(--text-tertiary)]" />}
+                  </button>
+                </div>
               ))}
             </div>
           </motion.div>
