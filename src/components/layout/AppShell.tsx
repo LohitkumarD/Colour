@@ -42,11 +42,37 @@ const ROUTE_TITLES: Record<string, string> = {
   '/terms': 'Terms',
 };
 
+const ROUTE_DESCRIPTIONS: Record<string, string> = {
+  '/': 'Your color workspace — recent colors, saved palettes and quick links to every tool.',
+  '/wheel': 'Pick colors visually on an interactive hue and saturation wheel with live harmony previews.',
+  '/converter': 'Convert colors between HEX, RGB, HSL, HSV, CMYK, LAB, XYZ, LCH, OKLab and OKLCH.',
+  '/harmony': 'Generate complementary, analogous, triadic and other color harmony palettes from a base color.',
+  '/tones': 'Build tints, shades and tones from a base color with adjustable steps.',
+  '/gradients': 'Design linear, radial and mesh gradients and export them as CSS.',
+  '/mixer': 'Mix paints and pigments like real media with realistic color-mixing math.',
+  '/pigment-wheel': 'Explore an artist pigment wheel for traditional color mixing relationships.',
+  '/extract': 'Pull a color palette out of any image.',
+  '/contrast': 'Check WCAG contrast ratios between foreground and background colors for accessible design.',
+  '/blindness': 'Simulate how colors appear under different types of color blindness.',
+  '/palettes': 'Manage, organize and export your saved color palettes and projects.',
+  '/assistant': 'Generate a color palette from a plain-language prompt.',
+  '/learn': 'Short lessons on color theory fundamentals, harmony rules and accessibility.',
+  '/settings': 'Customize theme, accessibility, defaults and manage your data.',
+  '/about': 'About Color Theory Studio — a premium, offline-first color science workbench.',
+  '/privacy': 'Privacy policy for Color Theory Studio.',
+  '/terms': 'Terms of use for Color Theory Studio.',
+};
+
 function useRouteTitle() {
   const location = useLocation();
   useEffect(() => {
     const name = ROUTE_TITLES[location.pathname];
     document.title = name ? `${name} · Color Theory Studio` : 'Color Theory Studio';
+
+    const description = ROUTE_DESCRIPTIONS[location.pathname];
+    if (description) {
+      document.querySelector('meta[name="description"]')?.setAttribute('content', description);
+    }
   }, [location.pathname]);
 }
 
